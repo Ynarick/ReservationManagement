@@ -28,17 +28,28 @@ class reservation:
                 a2=NomChamp.get()
                 a3=adresseChamp.get()
                 a4=TelChamp.get()
+                a1=int(a1)
                 if  not a1 or not a2 or not a3 or not a4:
                      messagebox.showerror("Erreur","Veuillez remplir tous les champs")
+                elif a1<0:
+                     messagebox.showerror("Erreur","Vérifiez bien le numéro du client")
                 else:
                     mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
                     mycursor=mysqldb.cursor()
-                    sql="INSERT INTO clients (numclient,nomclient,adresseclient,telhotel)VALUES(%s,%s,%s,%s)"
-                    valu=(a1,a2,a3,a4)
-                    mycursor.execute(sql,valu)
-                    mysqldb.commit()
-                    messagebox.showinfo("success","le client est bien ajoute.....")
-                    mysqldb.close()
+                    insert_sql="SELECT numclient FROM clients WHERE numclient = %s"
+                    insert_val=(a1,)
+                    mycursor.execute(insert_sql,insert_val)
+                    result=mycursor.fetchone()
+                    if result:
+                         messagebox.showerror("Attention","Ce numéro existe déjà")
+                    else:
+                    
+                        sql="INSERT INTO clients (numclient,nomclient,adresseclient,telhotel)VALUES(%s,%s,%s,%s)"
+                        valu=(a1,a2,a3,a4)
+                        mycursor.execute(sql,valu)
+                        mysqldb.commit()
+                        messagebox.showinfo("success","le client est bien ajoute.....")
+                        mysqldb.close()
             def modifierclient():
                 a1=NumCliChamp.get()
                 a2=NomChamp.get()
@@ -144,14 +155,14 @@ class reservation:
                  
 
             div=Frame(self.root,bd=2,relief=RIDGE,bg="red")
-            div.place(x=175,y=75,width=1210,height=350)
+            div.place(x=175,y=75,width=1440,height=350)
             divgauche=LabelFrame(div,text="Information sur le client",bg="white",font=("Times new roman",12,"bold"))
             divgauche.place(x=0,y=0,width=800,height=350)
-            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="gray")
+            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#2F4F4F")
             divdroite.place(x=800,y=0,width=640,height=350)
             divbouton=Frame(self.root,bd=2,relief=RIDGE,height=48,bg="#2F4F4F")
             divbouton.place(x=175,y=425,width=1440,height=60)
-            divtreeclient=Frame(self.root,bg="gray")
+            divtreeclient=Frame(self.root,bg="#2F4F4F")
             divtreeclient.place(x=175,y=485,width=1440,height=350)
            
 
@@ -174,7 +185,7 @@ class reservation:
             TelChamp.grid(row=3,column=1)
             #creation de la contenu de la div droite
 
-            firstdate=Label(divdroite,font=("Lucida Calligraphy",10,"bold"),text="Date disponible: ",padx=4,pady=8,bg="gray")
+            firstdate=Label(divdroite,font=("Lucida Calligraphy",10,"bold"),text="Date disponible: ",padx=4,pady=8,bg="#2F4F4F")
             firstdate.place(x=0,y=5)
             firstdateChamp=Entry(divdroite,width=25)
             firstdateChamp.place(x=140,y=10,height=25)
@@ -257,9 +268,9 @@ class reservation:
 
                 if not a1 or not a2 or not a3:
                     messagebox.showerror("Erreur","Veuillez remplir tous les champs")
-                if a2<a3:
+                elif a2<a3:
                    messagebox.showerror("info","verifier bien votre information")
-                if a2<0 and a3<0:
+                elif a2<0 and a3<0:
                      messagebox.showerror("Erreur","Veuillliez taper nombre positif")
                 else:
                    mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
@@ -324,14 +335,14 @@ class reservation:
 
            
             div=Frame(self.root,bd=2,relief=RIDGE,bg="red")
-            div.place(x=175,y=75,width=1210,height=350)
+            div.place(x=175,y=75,width=1440,height=350)
             divgauche=LabelFrame(div,text="Information vehicule",bg="white",font=("Times new roman",12,"bold"))
             divgauche.place(x=0,y=0,width=800,height=350)
-            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#333333")
+            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#2F4F4F")
             divdroite.place(x=800,y=0,width=600,height=350)
             divbouton=Frame(self.root,bd=2,relief=RIDGE,height=48,bg="#2F4F4F")
             divbouton.place(x=175,y=425,width=1440,height=60)
-            divtreeclient=Frame(self.root,bg="gray")
+            divtreeclient=Frame(self.root,bg="#2F4F4F")
             divtreeclient.place(x=175,y=485,width=1210,height=300)
 
             #creation de la contenu de la div gauche
@@ -351,8 +362,12 @@ class reservation:
 
 
             #creation de treeview
-
+            scroll_x=ttk.Scrollbar(divtreeclient,orient=HORIZONTAL)
+            scroll_y=ttk.Scrollbar(divtreeclient,orient=VERTICAL)
             treev=ttk.Treeview(divtreeclient,columns=(1,2,3),show="headings")
+
+            scroll_x.pack(side=BOTTOM,fill=X)
+            scroll_y.pack(side=RIGHT,fill=Y)
             treev.place(x=0,y=0)
             treev.heading(1,text="Numero vehicule",anchor="center")
             treev.heading(2,text="Nombre de place",anchor="center")
@@ -363,6 +378,7 @@ class reservation:
             treev.column(1,width=200)
             treev.column(2,width=200)
             treev.column(3,width=200)
+            treev.pack(fill=BOTH,expand=1)
             
 
             #Bouton CRUD vehicule
@@ -398,53 +414,45 @@ class reservation:
                 a4=nbrpersChamp.get()
                 a5=NumcliChamp.get()
                 a6=NumVehChamp.get()
+                a4=int(a4)
+                mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
+                mycursor=mysqldb.cursor()
+                sql=("select nbrplacedispo FROM vehicules WHERE numvehicule = %s ")
+                val=(a6,)
+                mycursor.execute(sql,val)
+                var0=mycursor.fetchone()
                 
                 if not a1 or not a2 or not a3 or not a4 or not a5 or not a6:
                      messagebox.showerror("Attention","Veuillez remplir tous les champ")
-                a4=int(a4)
-                if a4<0:
-                    messagebox.showerror("Erreur","Verifier bien votre nombre personne")
-                # a5= int(a5)
-                # a4=int(a4)
                 
-                # mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
-                # mycursor=mysqldb.cursor()
-                # mycursor.execute("select numclient from clients where numclient=%s ",(a5,))
-                # var=mycursor.fetchone()
-                # if var[0]!= a5 :
-                #     messagebox.showerror("Erreur","le numero du client n' existe pas")
-                    
-                
-                # mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
-                # mycursor=mysqldb.cursor()
-                # mycursor.execute("select numvehicule from vehicules WHERE numvehicule=%s",(a6,))
-                # var1=mycursor.fetchone()
-                # if var1[0]!=a6 :
-                #      messagebox.showerror("Erreur","le numero de vehicule n' existe pas")
-                
-                # mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
-                # mycursor=mysqldb.cursor()
-                # mycursor.execute("select firstdate from calendriers WHERE firstdate=%s",(a2,))
-                # var2=mycursor.fetchone()
-                # if var2[0]==a2 :
-                #      messagebox.showerror("Erreur","Ce date n'existe pas dans la date disponible")
-                
+                elif a4<0:
+                     messagebox.showerror("Erreur","Verifier bien votre nombre personne")
+
+                elif a4>var0[0]:
+                     messagebox.showerror("Erreur","il n'y a pas assez de place disponible pour autant de nombre de personnes dans le vehicule que vous avez choisi")
+                     
                
                
                 else:
 
                     mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
                     mycursor=mysqldb.cursor()
-                    
-                    sql="INSERT INTO reservers (numres,datedepart,datere,nbrpersonne,numcli,numveh)VALUES(%s,%s,%s,%s,%s,%s)"
-                    valu=(a1,a2,a3,a4,a5,a6)
-                    mycursor.execute(sql,valu)
-                    vehicule=("update vehicules set nbrplacedispo=nbrplacedispo-%s where numvehicule=%s")
-                    val=(a4,a6)
-                    mycursor.execute(vehicule,val)
-                    mysqldb.commit()
-                    messagebox.showinfo("succès","Ajout de reservation avec succès...")
-                    mysqldb.close()
+                    sql = "SELECT numres FROM reservers WHERE numres = %s"
+                    val = (a1,)
+                    mycursor.execute(sql, val)
+                    result = mycursor.fetchone()
+                    if result:
+                       messagebox.showerror("Attention", "Ce numéro de réservation existe déjà")
+                    else:
+                        sql="INSERT INTO reservers (numres,datedepart,datere,nbrpersonne,numcli,numveh)VALUES(%s,%s,%s,%s,%s,%s)"
+                        valu=(a1,a2,a3,a4,a5,a6)
+                        mycursor.execute(sql,valu)
+                        vehicule=("update vehicules set nbrplacedispo=nbrplacedispo-%s where numvehicule=%s")
+                        val=(a4,a6)
+                        mycursor.execute(vehicule,val)
+                        mysqldb.commit()
+                        messagebox.showinfo("succès","Ajout de reservation avec succès...")
+                        mysqldb.close()
 
 
             def modifierreserver():
@@ -460,7 +468,7 @@ class reservation:
                 valu=(a1,a2,a3,a4,a5,a6,a1)
                 mycursor.execute(sql,valu)
                 mysqldb.commit()
-                messagebox.showinfo("success","modification avec successs.....")
+                messagebox.showinfo("success","modification avec succes.....")
                 mysqldb.close()
 
 
@@ -559,14 +567,14 @@ class reservation:
                      
                     mysqldb=mysql.connector.connect(host="localhost",user="root",password="",database="gestion")
                     mycursor=mysqldb.cursor()
-                    query = """SELECT V.numvehicule, V.nbrplacedispo, V.nbrplace FROM vehicules V WHERE V.numvehicule IN (SELECT R.numveh FROM reservers R WHERE R.datedepart IN (SELECT  R2.datedepart FROM reservers R2))"""
+                    query = """SELECT V.numvehicule, V.nbrplacedispo, V.nbrplace FROM vehicules V WHERE V.numvehicule IN (SELECT R.numveh FROM reservers R WHERE R.datedepart IN (SELECT DISTINCT R2.datedepart FROM reservers R2))"""
                     mycursor.execute(query)
                     result = mycursor.fetchall()
                     mycursor.close()
 
                     places = []
                     for row in result:
-                        places.append(f"Véhicule N°: {row[0]} \n- Places disponibles : {row[1]} \n- Nombres des Places : {row[2]}\n\n")
+                        places.append(f"Véhicule N°: {row[0]} \n- Places disponibles : {row[1]} \n- Nombres des Places : {row[2]}\n")
     
                         if places:
                             resultat.config(text="\n".join(places))
@@ -591,18 +599,14 @@ class reservation:
             div.place(x=175,y=75,width=1440,height=350)
             divgauche=LabelFrame(div,text="Information réservation",bg="white",font=("Times new roman",12,"bold"))
             divgauche.place(x=0,y=0,width=600,height=350)
-            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#333333")
+            divdroite=LabelFrame(div,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#2F4F4F")
             divdroite.place(x=600,y=0,width=400,height=350)
-            # divlist=Frame(divdroite,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#333333")
-            # divlist.place(x=0,y=5,width=200,height=345)
-            # divrecherche=Frame(divdroite,bd=2,font=("Times new roman",12,"bold"),relief=RIDGE,padx=10,bg="#333333")
-            # divrecherche.place(x=0,y=5,width=200,height=345)
-
+            
             divbouton=Frame(self.root,bd=2,relief=RIDGE,height=48,bg="#2F4F4F")
             divbouton.place(x=175,y=425,width=1440,height=60)
-            divtreeclient=Frame(self.root,bg="gray")
+            divtreeclient=Frame(self.root,bg="#2F4F4F")
             divtreeclient.place(x=175,y=485,width=1400,height=300)
-            divreser=Frame(divtreeclient,bg="gray")
+            divreser=Frame(divtreeclient,bg="#2F4F4F")
             divreser.place(x=0,y=0,width=1200,height=300)
 
             #creation de la contenu de la div gauche
@@ -693,7 +697,7 @@ class reservation:
             scroll_x=ttk.Scrollbar(command=treeRes.xview)
             scroll_y=ttk.Scrollbar(command=treeRes.yview)
 
-            treeRes.place(x=0,y=0)
+            treeRes.place(x=40,y=0)
             treeRes.heading(1,text="Numero reservation ",anchor="center")
             treeRes.heading(2,text="Date de depart",anchor="center")
             treeRes.heading(3,text="Date de reservation",anchor="center")
@@ -711,19 +715,14 @@ class reservation:
             treeRes.column(6,width=100)
             # treeclient.column(4,width=200)
             treeRes.pack(fill=BOTH,expand=1)
+            
+            
 
             resultat = Label(divdroite, text="")
             resultat.place(x=5,y=10)
 
 
-            #recherche 
-            # searchpar=Label(divrecherche,text="Rechercher par",font=("Nigerian",12,"bold"),bg="red",fg="black",padx=2,pady=6)
-            # searchpar.grid(row=0,column=0)
-            # choi=ttk.Combobox(divrecherche,textvariable=self.recherche,state="readonly",font=("ARIAL",13,"bold"))
-            # choi["values"]=("Numero de compte","Nom")
-            # choi.grid(row=0,column=1)
-            # choi.current(0)
-
+            
 
             
 
@@ -751,10 +750,7 @@ class reservation:
             facture_button.place(x=1145,y=5,width=200,height=45)
 
             
-            # scroll=ttk.Scrollbar(divdroite,orient=VERTICAL)
-            # scroll.pack(side=RIGHT,fill=Y)
-            # scroll=ttk.Scrollbar(command=resultat.yview)
-            # resultat.pack(fill=Y,expand=1)
+            
 
             pointcommun()
             voir()
